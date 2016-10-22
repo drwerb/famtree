@@ -1,1 +1,3 @@
 *.pyc
+famtree/db
+famtree/logs/
