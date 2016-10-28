@@ -1,0 +1,71 @@
+diff --git a/neo4django/db/models/query.py b/neo4django/db/models/query.py
+index b6cfe51..9bac337 100644
+--- a/neo4django/db/models/query.py
++++ b/neo4django/db/models/query.py
+@@ -2,8 +2,8 @@ from django.db.models import Q
+ from django.db.models.query import QuerySet
+ from django.db.models.sql import subqueries
+ from django.core import exceptions
+-from django.db.models.loading import get_model
+-from django.utils.datastructures import SortedDict
++from swapper import load_model
++from collections import OrderedDict
+ 
+ from lucenequerybuilder import Q as LQ
+ 
+@@ -670,7 +670,7 @@ def execute_select_related(models=None, query=None, index_name=None,
+         rels_by_id[r.id] = r
+ 
+     #build all the models, ignoring types that django hasn't loaded
+-    rel_nodes_types = ((n, get_model(*t.split(':')))
++    rel_nodes_types = ((n, load_model(*t.split(':')))
+                        for n, t in itertools.izip(nodes, types))
+ 
+     rel_models = (t._neo4j_instance(n) for n, t in rel_nodes_types if
+@@ -878,7 +878,7 @@ class Query(object):
+                          else agg.prop_name
+             return type(agg)(agged_over, source=agg.source,
+                              is_summary=agg.is_summary)
+-        query.return_fields = SortedDict(
++        query.return_fields = OrderedDict(
+             (alias, make_aggregate_of_n(agg).as_cypher())
+             for alias, agg in query.aggregates.iteritems())
+         groovy, params = query.as_groovy(using)
+diff --git a/neo4django/tests/__init__.py b/neo4django/tests/__init__.py
+index 1045334..d48a945 100644
+--- a/neo4django/tests/__init__.py
++++ b/neo4django/tests/__init__.py
+@@ -1,5 +1,7 @@
+ def setup():
+     global neo4django, neo4jrestclient, gdb, Person, settings, neo_constants
++    import django
++    django.setup()
+ 
+     from django.conf import settings
+ 
+diff --git a/neo4django/utils.py b/neo4django/utils.py
+index 364a0c7..74eb5c4 100644
+--- a/neo4django/utils.py
++++ b/neo4django/utils.py
+@@ -5,7 +5,7 @@ from collections import defaultdict
+ from threading import local
+ 
+ from django.core.exceptions import ImproperlyConfigured
+-from django.utils.importlib import import_module
++from importlib import import_module
+ 
+ from neo4django.decorators import transactional
+ from neo4django.neo4jclient import EnhancedGraphDatabase
+diff --git a/setup.py b/setup.py
+index d328a46..1adc474 100644
+--- a/setup.py
++++ b/setup.py
+@@ -20,7 +20,7 @@ setup(
+         'decorator>=3.3.1',
+         'python-dateutil>=2.0',
+         'neo4jrestclient>=1.7',
+-        'Django>=1.3, <1.6',
++        'Django>=1.3, <1.11',
+         'lucene-querybuilder>=0.1.6'
+     ],
+     tests_require=[
