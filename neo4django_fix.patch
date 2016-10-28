@@ -1,3 +1,29 @@
+diff --git a/neo4django/db/models/properties.py b/neo4django/db/models/properties.py
+index 6e4561f..258596d 100644
+--- a/neo4django/db/models/properties.py
++++ b/neo4django/db/models/properties.py
+@@ -27,7 +27,7 @@ from neo4django.constants import ERROR_ATTR
+ MIN_INT = -9223372036854775808
+ MAX_INT = 9223372036854775807
+ 
+-FIELD_PASSTHROUGH_METHODS = ('formfield','get_flatchoices','_get_flatchoices',
++FIELD_PASSTHROUGH_METHODS = ('formfield',#'get_flatchoices','_get_flatchoices',
+                              'set_attributes_from_name', )
+ 
+ 
+@@ -98,9 +98,9 @@ class Property(object):
+     def default(self):
+         self.get_default()
+ 
+-    @property
+-    def flatchoices(self):
+-        return self._get_flatchoices()
++    #@property
++    #def flatchoices(self):
++    #    return self._get_flatchoices()
+ 
+     def get_attname_column(self):
+         return (self.name, None)
 diff --git a/neo4django/db/models/query.py b/neo4django/db/models/query.py
 index b6cfe51..9bac337 100644
 --- a/neo4django/db/models/query.py
@@ -32,17 +58,25 @@ index b6cfe51..9bac337 100644
              for alias, agg in query.aggregates.iteritems())
          groovy, params = query.as_groovy(using)
 diff --git a/neo4django/tests/__init__.py b/neo4django/tests/__init__.py
-index 1045334..d48a945 100644
+index 1045334..cdb358b 100644
 --- a/neo4django/tests/__init__.py
 +++ b/neo4django/tests/__init__.py
-@@ -1,5 +1,7 @@
+@@ -1,3 +1,6 @@
++import django
++django.setup()
++
  def setup():
      global neo4django, neo4jrestclient, gdb, Person, settings, neo_constants
-+    import django
-+    django.setup()
  
-     from django.conf import settings
+@@ -8,6 +11,8 @@ def setup():
+     from neo4django.db import connection as gdb
+     import neo4jrestclient.constants as neo_constants
  
++
++
+     class Person(models.NodeModel):
+         name = models.StringProperty()
+         age = models.IntegerProperty(indexed=True)
 diff --git a/neo4django/utils.py b/neo4django/utils.py
 index 364a0c7..74eb5c4 100644
 --- a/neo4django/utils.py
