@@ -17,3 +17,18 @@ class Person(models.Model):
 class PersonInfo(models.Model):
     person = models.ForeignKey(Person, on_delete = models.CASCADE)
     info_text = models.CharField(max_length = 500)
+
+class PersonRelation(models.Model):
+    RELATION_TYPES = (
+        ('parent', 'Parent'),
+        ('sibling', 'Sibling'),
+        ('child', 'Child'),
+        ('step_parent', 'Step parent'),
+        ('step_sibling', 'Step sibling'),
+        ('step_child', 'Step child'),
+        ('marriage', 'Marriage'),
+        ('divorce', 'Divorce'),
+    )
+    person = models.ForeignKey(Person, on_delete=models.CASCADE, related_name="relations_to")
+    rel_persons = models.ManyToManyField(Person, related_name="relations_from")
+    rel_type = models.CharField(max_length=20, choices=RELATION_TYPES)
