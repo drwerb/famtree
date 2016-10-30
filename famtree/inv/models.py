@@ -10,6 +10,7 @@ class Person(models.Model):
     midlename = models.CharField(max_length = 50)
     birthdate = models.DateTimeField(null = True, blank = True)
     deathdate = models.DateTimeField(null = True, blank = True)
+    relations = models.ManyToManyField('self', through='Relation', symmetrical=False)
 
     def __str__(self):
         return (self.lastname + " " + self.firstname + " " + self.midlename).encode('utf8', errors = 'replace')
@@ -18,7 +19,7 @@ class PersonInfo(models.Model):
     person = models.ForeignKey(Person, on_delete = models.CASCADE)
     info_text = models.CharField(max_length = 500)
 
-class PersonRelation(models.Model):
+class Relation(models.Model):
     RELATION_TYPES = (
         ('parent', 'Parent'),
         ('sibling', 'Sibling'),
@@ -29,6 +30,7 @@ class PersonRelation(models.Model):
         ('marriage', 'Marriage'),
         ('divorce', 'Divorce'),
     )
-    person = models.ForeignKey(Person, on_delete=models.CASCADE, related_name="relations_to")
-    rel_persons = models.ManyToManyField(Person, related_name="relations_from")
+    person = models.ForeignKey(Person, on_delete=models.CASCADE, related_name="relation_from")
     rel_type = models.CharField(max_length=20, choices=RELATION_TYPES)
+    related = models.ForeignKey(Person, related_name="relation_to")
+
